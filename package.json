@@ -5,10 +5,14 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dashboard": "node dashboard.js",
+    "start:all": "node index.js & node dashboard.js"
   },
   "dependencies": {
-    "discord.js": "^14.15.3"
+    "discord.js": "^14.15.3",
+    "dotenv": "17.4.2",
+    "express": "4.22.2"
   },
   "engines": {
     "node": ">=18.0.0"

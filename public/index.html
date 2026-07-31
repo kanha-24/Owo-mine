@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OwO Mine Tracker — Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { background:#13131f; color:#e2e8f0; font-family:system-ui,sans-serif; margin:0; }
+  .card { background:#1e1e2e; border:1px solid #3b3b52; border-radius:12px; padding:1.25rem; }
+  .tab-btn { cursor:pointer; padding:0.4rem 1rem; border-radius:8px; font-size:0.875rem;
+    font-weight:500; border:none; background:#27273a; color:#94a3b8; transition:all 0.15s; }
+  .tab-btn.active { background:#8b5cf6; color:#fff; }
+  .tile-cell { width:52px; height:52px; border-radius:8px; display:flex; align-items:center;
+    justify-content:center; font-weight:700; font-size:0.9rem; cursor:default; transition:all 0.3s; }
+  .h0{background:#1e293b;color:#64748b;} .h1{background:#1e3a5f;color:#7dd3fc;}
+  .h2{background:#1a4731;color:#6ee7b7;} .h3{background:#3d3010;color:#fcd34d;}
+  .h4{background:#4a1c0a;color:#fb923c;} .h5{background:#4a0a0a;color:#f87171;}
+  select,input[type=number],input[type=date] {
+    background:#27273a; border:1px solid #3b3b52; color:#e2e8f0;
+    border-radius:8px; padding:0.35rem 0.65rem; font-size:0.875rem; outline:none; }
+  select:focus,input:focus { border-color:#8b5cf6; }
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.7rem;font-weight:600;}
+  .badge-exp{background:#4a0a0a;color:#f87171;} .badge-cash{background:#1a4731;color:#6ee7b7;}
+  table{border-collapse:collapse;width:100%;}
+  th{text-align:left;padding:0.4rem 0.75rem 0.4rem 0;color:#64748b;font-size:0.75rem;font-weight:500;}
+  td{padding:0.35rem 0.75rem 0.35rem 0;font-size:0.8rem;border-bottom:1px solid #2a2a3e;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#27273a;}
+  ::-webkit-scrollbar{width:5px;height:5px;}
+  ::-webkit-scrollbar-track{background:#13131f;}
+  ::-webkit-scrollbar-thumb{background:#3b3b52;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav style="background:#13131f;border-bottom:1px solid #3b3b52;position:sticky;top:0;z-index:50;padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <span style="font-size:1.5rem;">⛏️</span>
+    <span style="font-weight:700;font-size:1.1rem;color:#fff;">OwO Mine Tracker</span>
+    <span style="background:#27273a;color:#8b5cf6;padding:2px 8px;border-radius:999px;font-size:0.7rem;font-weight:600;">Dashboard</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.75rem;">
+    <select id="guildSelect" onchange="onGuildChange(this.value)"></select>
+    <button onclick="exportData('csv')" style="background:#27273a;border:1px solid #3b3b52;color:#e2e8f0;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.8rem;">⬇ CSV</button>
+    <button onclick="exportData('json')" style="background:#27273a;border:1px solid #3b3b52;color:#e2e8f0;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;font-size:0.8rem;">⬇ JSON</button>
+  </div>
+</nav>
+
+<!-- TABS -->
+<div style="padding:1rem 1.5rem 0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+  <button class="tab-btn" onclick="switchTab('heatmap',this)">Heatmaps</button>
+  <button class="tab-btn" onclick="switchTab('players',this)">Players</button>
+  <button class="tab-btn" onclick="switchTab('compare',this)">Compare</button>
+  <button class="tab-btn" onclick="switchTab('history',this)">History</button>
+</div>
+
+<main style="padding:0 1.5rem 3rem;">
+
+<!-- OVERVIEW -->
+<div id="tab-overview" class="tab-pane">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem;">
+    <div class="card" style="text-align:center;"><div id="st-total" style="font-size:2rem;font-weight:700;color:#8b5cf6;">—</div><div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Total Games</div></div>
+    <div class="card" style="text-align:center;"><div id="st-cash" style="font-size:2rem;font-weight:700;color:#22c55e;">—</div><div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Cash-outs</div></div>
+    <div class="card" style="text-align:center;"><div id="st-exp" style="font-size:2rem;font-weight:700;color:#ef4444;">—</div><div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Explosions</div></div>
+    <div class="card" style="text-align:center;"><div id="st-players" style="font-size:2rem;font-weight:700;color:#38bdf8;">—</div><div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Players</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+    <div class="card"><div style="font-weight:600;margin-bottom:0.75rem;">📈 Daily Activity (30 days)</div><div style="height:180px;"><canvas id="activityChart"></canvas></div></div>
+    <div class="card"><div style="font-weight:600;margin-bottom:0.75rem;">💣 Bomb Count Distribution</div><div style="height:180px;"><canvas id="bombDistChart"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+      <span style="font-weight:600;">📊 Outcomes Over Time</span>
+      <select id="trendDays" onchange="loadTrends()"><option value="7">7 days</option><option value="14">14 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
+    </div>
+    <div style="height:160px;"><canvas id="outcomesChart"></canvas></div>
+  </div>
+</div>
+
+<!-- HEATMAPS -->
+<div id="tab-heatmap" class="tab-pane" style="display:none;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:0.75rem;">🖱️ Tile Click Heatmap</div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <label style="font-size:0.8rem;color:#94a3b8;">Move #</label>
+        <input type="number" id="tileMove" value="1" min="1" max="8" style="width:60px;" oninput="loadTileHeatmap()">
+      </div>
+      <div id="tileGrid" style="display:flex;flex-direction:column;align-items:center;gap:8px;"></div>
+      <div style="height:160px;margin-top:1rem;"><canvas id="tileChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:0.75rem;">💣 Bomb Position Heatmap</div>
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <label style="font-size:0.8rem;color:#94a3b8;">After move</label>
+        <input type="number" id="bombMove" value="0" min="0" max="8" style="width:60px;" oninput="loadBombHeatmap()">
+        <label style="font-size:0.8rem;color:#94a3b8;">Bombs</label>
+        <select id="bombCount" onchange="loadBombHeatmap()"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select>
+      </div>
+      <div id="bombGrid" style="display:flex;flex-direction:column;align-items:center;gap:8px;"></div>
+      <div style="height:160px;margin-top:1rem;"><canvas id="bombChart"></canvas></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <div style="font-weight:600;margin-bottom:0.75rem;font-size:0.9rem;">🎨 Heatmap Legend (5% steps — relative to most-chosen tile)</div>
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+      <div class="tile-cell h0" style="width:auto;padding:0 12px;font-size:0.75rem;">0–9%</div>
+      <div class="tile-cell h1" style="width:auto;padding:0 12px;font-size:0.75rem;">10–29%</div>
+      <div class="tile-cell h2" style="width:auto;padding:0 12px;font-size:0.75rem;">30–49%</div>
+      <div class="tile-cell h3" style="width:auto;padding:0 12px;font-size:0.75rem;">50–69%</div>
+      <div class="tile-cell h4" style="width:auto;padding:0 12px;font-size:0.75rem;">70–89%</div>
+      <div class="tile-cell h5" style="width:auto;padding:0 12px;font-size:0.75rem;">90–100%</div>
+    </div>
+  </div>
+</div>
