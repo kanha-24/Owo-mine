@@ -8,8 +8,7 @@
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.js.org)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-> **Honesty note:** OwO's bomb placement is random per round.
-> This bot records *history* — it does not predict the future.
+
 > Treat all heatmap recommendations as statistical tendencies, not guarantees.
 
 </div>
