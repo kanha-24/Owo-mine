@@ -62,10 +62,25 @@ https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scop
 
 ```bash
 npm install
-npm start
 ```
 
-Expected output:
+Then double-click **`start.bat`** — it will ask if you want to launch the dashboard too:
+
+```
+  Launch dashboard too? (Y/N):
+```
+
+- **Y** — opens the dashboard in a separate terminal window at `http://localhost:3000`, then starts the bot. Both processes run independently — closing one won't affect the other.
+- **N** — starts the bot only.
+
+Or run manually:
+
+```bash
+npm start               # bot only
+npm run dashboard       # dashboard only (separate terminal)
+```
+
+Expected bot output:
 ```
 [Ready] Logged in as yathuwuowominebot#6542
 [Ready] Watching for OwO mine rounds. Use "@bot start mine" in a server to begin tracking.
@@ -76,13 +91,7 @@ Expected output:
 
 ## 🌐 Web Dashboard
 
-A read-only stats dashboard is included, running separately from the bot.
-
-```bash
-# In a second terminal
-npm run dashboard
-# Then open http://localhost:3000
-```
+A read-only stats dashboard is included, running separately from the bot. Access it at **`http://localhost:3000`** after launching via `start.bat` or `npm run dashboard`.
 
 ### Dashboard Tabs
 
